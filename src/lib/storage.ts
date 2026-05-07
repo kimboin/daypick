@@ -6,6 +6,11 @@ import { generateInviteCode } from "@/lib/invite-code";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 import type { Participant, Room, RoomStore } from "@/lib/types";
 
+function formatSupabaseError(prefix: string, error: { message?: string; details?: string | null; hint?: string | null }) {
+  const parts = [error.message, error.details ?? undefined, error.hint ?? undefined].filter(Boolean);
+  return `${prefix}${parts.length > 0 ? `: ${parts.join(" / ")}` : ""}`;
+}
+
 const dataDirectory = path.join(process.cwd(), "data");
 const storePath = path.join(dataDirectory, "rooms.json");
 
@@ -135,7 +140,7 @@ async function createRoomInSupabase(input: {
       .maybeSingle();
 
     if (error) {
-      throw new Error("초대코드 확인 중 오류가 발생했습니다.");
+      throw new Error(formatSupabaseError("초대코드 확인 중 오류가 발생했습니다", error));
     }
 
     if (!existing) {
@@ -157,7 +162,11 @@ async function createRoomInSupabase(input: {
     .single();
 
   if (roomError || !insertedRoom) {
-    throw new Error("방 생성에 실패했습니다.");
+    throw new Error(
+      roomError
+        ? formatSupabaseError("방 생성에 실패했습니다", roomError)
+        : "방 생성에 실패했습니다.",
+    );
   }
 
   const { data: insertedParticipant, error: participantError } = await supabase
@@ -172,7 +181,11 @@ async function createRoomInSupabase(input: {
     .single();
 
   if (participantError || !insertedParticipant) {
-    throw new Error("방장 일정 저장에 실패했습니다.");
+    throw new Error(
+      participantError
+        ? formatSupabaseError("방장 일정 저장에 실패했습니다", participantError)
+        : "방장 일정 저장에 실패했습니다.",
+    );
   }
 
   return mapRoom({
@@ -190,7 +203,7 @@ async function getRoomFromSupabase(inviteCode: string) {
     .maybeSingle();
 
   if (roomError) {
-    throw new Error("방 정보를 불러오지 못했습니다.");
+    throw new Error(formatSupabaseError("방 정보를 불러오지 못했습니다", roomError));
   }
 
   if (!room) {
@@ -204,7 +217,7 @@ async function getRoomFromSupabase(inviteCode: string) {
     .order("created_at", { ascending: true });
 
   if (participantsError) {
-    throw new Error("참여자 정보를 불러오지 못했습니다.");
+    throw new Error(formatSupabaseError("참여자 정보를 불러오지 못했습니다", participantsError));
   }
 
   return mapRoom({
@@ -249,7 +262,7 @@ async function addOrUpdateParticipantInSupabase(
       .eq("id", existing.id);
 
     if (error) {
-      throw new Error("참여자 일정 수정에 실패했습니다.");
+      throw new Error(formatSupabaseError("참여자 일정 수정에 실패했습니다", error));
     }
   } else {
     const { error } = await supabase.from("participants").insert({
@@ -260,7 +273,7 @@ async function addOrUpdateParticipantInSupabase(
     });
 
     if (error) {
-      throw new Error("참여자 일정 저장에 실패했습니다.");
+      throw new Error(formatSupabaseError("참여자 일정 저장에 실패했습니다", error));
     }
   }
 
