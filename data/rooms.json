@@ -1,0 +1,27 @@
+{
+  "rooms": [
+    {
+      "id": "27613285-2032-4cdc-9a6d-05644ab7b59f",
+      "inviteCode": "317838",
+      "hostName": "보인",
+      "startDate": "2026-05-07",
+      "endDate": "2026-05-31",
+      "createdAt": "2026-05-07T08:18:32.798Z",
+      "updatedAt": "2026-05-07T08:18:32.798Z",
+      "participants": [
+        {
+          "id": "09549ddc-e598-4818-b59d-a070b04c4939",
+          "nickname": "보인",
+          "isHost": true,
+          "availableDates": [
+            "2026-05-07",
+            "2026-05-20",
+            "2026-05-24"
+          ],
+          "createdAt": "2026-05-07T08:18:32.798Z",
+          "updatedAt": "2026-05-07T08:18:32.798Z"
+        }
+      ]
+    }
+  ]
+}
