@@ -78,8 +78,8 @@ export function CreateForm() {
             />
           </div>
 
-          <div className="row">
-            <div className="field" style={{ flex: 1 }}>
+          <div className="row form-row">
+            <div className="field form-row-item">
               <label htmlFor="startDate">시작일</label>
               <input
                 id="startDate"
@@ -92,7 +92,7 @@ export function CreateForm() {
                 }}
               />
             </div>
-            <div className="field" style={{ flex: 1 }}>
+            <div className="field form-row-item">
               <label htmlFor="endDate">종료일</label>
               <input
                 id="endDate"

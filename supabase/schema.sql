@@ -1,4 +1,5 @@
 create extension if not exists pgcrypto;
+create extension if not exists pg_cron;
 
 create table if not exists public.rooms (
   id uuid primary key default gen_random_uuid(),
