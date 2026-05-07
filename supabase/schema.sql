@@ -6,6 +6,7 @@ create table if not exists public.rooms (
   host_name varchar(50) not null,
   start_date date not null,
   end_date date not null,
+  expires_at timestamptz not null default (now() + interval '7 days'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -25,3 +26,18 @@ create unique index if not exists participants_room_nickname_unique
 
 create index if not exists participants_room_id_idx
   on public.participants (room_id);
+
+alter table public.rooms
+  add column if not exists expires_at timestamptz not null default (now() + interval '7 days');
+
+select cron.schedule(
+  'delete-expired-rooms',
+  '0 4 * * *',
+  $$
+    delete from public.rooms
+    where expires_at < now();
+  $$
+)
+where not exists (
+  select 1 from cron.job where jobname = 'delete-expired-rooms'
+);

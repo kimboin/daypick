@@ -14,6 +14,14 @@ function formatSupabaseError(prefix: string, error: { message?: string; details?
 const dataDirectory = path.join(process.cwd(), "data");
 const storePath = path.join(dataDirectory, "rooms.json");
 
+function getExpiresAt() {
+  return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+}
+
+function isExpired(expiresAt: string) {
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
 async function ensureStore() {
   await mkdir(dataDirectory, { recursive: true });
   try {
@@ -94,6 +102,7 @@ function mapRoom(room: {
   host_name: string;
   start_date: string;
   end_date: string;
+  expires_at: string;
   created_at: string;
   updated_at: string;
   participants?: Array<{
@@ -111,6 +120,7 @@ function mapRoom(room: {
     hostName: room.host_name,
     startDate: room.start_date,
     endDate: room.end_date,
+    expiresAt: room.expires_at,
     createdAt: room.created_at,
     updatedAt: room.updated_at,
     participants: (room.participants ?? []).map(mapParticipant),
@@ -157,6 +167,7 @@ async function createRoomInSupabase(input: {
       host_name: input.hostName.trim(),
       start_date: input.startDate,
       end_date: input.endDate,
+      expires_at: getExpiresAt(),
     })
     .select("*")
     .single();
@@ -210,6 +221,10 @@ async function getRoomFromSupabase(inviteCode: string) {
     return null;
   }
 
+  if (isExpired(room.expires_at)) {
+    return null;
+  }
+
   const { data: participants, error: participantsError } = await supabase
     .from("participants")
     .select("*")
@@ -236,7 +251,7 @@ async function addOrUpdateParticipantInSupabase(
 
   const room = await getRoomFromSupabase(inviteCode);
   if (!room) {
-    throw new Error("유효하지 않은 초대코드입니다.");
+    throw new Error("유효하지 않거나 만료된 초대코드입니다.");
   }
 
   const availableDates = validateRoomInput(
@@ -316,6 +331,7 @@ export async function createRoom(input: {
     hostName: input.hostName.trim(),
     startDate: input.startDate,
     endDate: input.endDate,
+    expiresAt: getExpiresAt(),
     createdAt: timestamp,
     updatedAt: timestamp,
     participants: [hostParticipant],
@@ -332,7 +348,16 @@ export async function getRoom(inviteCode: string) {
   }
 
   const store = await readStore();
-  return store.rooms.find((room) => room.inviteCode === inviteCode) ?? null;
+  const room = store.rooms.find((item) => item.inviteCode === inviteCode) ?? null;
+  if (!room) {
+    return null;
+  }
+
+  if (isExpired(room.expiresAt)) {
+    return null;
+  }
+
+  return room;
 }
 
 export async function addOrUpdateParticipant(
@@ -350,7 +375,11 @@ export async function addOrUpdateParticipant(
   const store = await readStore();
   const room = store.rooms.find((item) => item.inviteCode === inviteCode);
   if (!room) {
-    throw new Error("유효하지 않은 초대코드입니다.");
+    throw new Error("유효하지 않거나 만료된 초대코드입니다.");
+  }
+
+  if (isExpired(room.expiresAt)) {
+    throw new Error("유효하지 않거나 만료된 초대코드입니다.");
   }
 
   const availableDates = validateRoomInput(

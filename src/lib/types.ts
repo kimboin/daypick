@@ -13,6 +13,7 @@ export type Room = {
   hostName: string;
   startDate: string;
   endDate: string;
+  expiresAt: string;
   createdAt: string;
   updatedAt: string;
   participants: Participant[];

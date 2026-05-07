@@ -15,6 +15,11 @@
 2. 프로젝트가 준비되면 `Project URL`과 `service_role key`를 확인합니다.
 3. SQL Editor를 열고 [supabase/schema.sql](./supabase/schema.sql) 내용을 실행합니다.
 
+주의:
+- 기존에 이미 `rooms`, `participants` 테이블을 만든 상태여도 다시 실행해도 됩니다.
+- 이번 스키마에는 `expires_at` 컬럼 추가와 만료 방 자동 삭제 cron job 생성이 포함되어 있습니다.
+- `cron.schedule(...)`를 쓰려면 Supabase에서 `pg_cron`이 활성화되어 있어야 합니다.
+
 필요한 환경변수:
 
 ```bash
@@ -77,6 +82,7 @@ vercel --prod
 3. 결과 화면에서 공유 링크 복사 확인
 4. 공유 링크(`/join?code=123456`) 접속 시 초대코드 자동 입력 확인
 5. Supabase에 데이터 저장 확인
+6. `rooms.expires_at` 값이 생성 시점 기준 7일 뒤로 들어가는지 확인
 
 ## 5. 운영 시 주의사항
 
@@ -84,6 +90,7 @@ vercel --prod
 - 현재 구조에서는 서버 코드에서만 이 키를 사용합니다.
 - 환경변수를 바꾼 뒤에는 Vercel에서 반드시 재배포해야 반영됩니다.
 - 현재는 로그인 없는 서비스라 누구나 초대코드만 알면 참여 가능합니다.
+- 만료된 방은 조회/참여 시 앱에서 차단되고, DB에서는 cron job이 정리합니다.
 
 ## 6. 직접 배포를 제가 대신하려면 필요한 것
 

@@ -34,6 +34,8 @@ body {
     radial-gradient(circle at bottom right, rgba(255, 233, 243, 0.95), transparent 28%),
     linear-gradient(180deg, #fff5fa 0%, #ffeaf4 48%, #ffe2f0 100%);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 a {
@@ -44,6 +46,10 @@ a {
 button,
 input {
   font: inherit;
+}
+
+.app-main {
+  flex: 1;
 }
 
 .page-shell {
@@ -456,6 +462,43 @@ input {
   font-size: 14px;
 }
 
+.site-footer {
+  padding: 0 16px 28px;
+}
+
+.site-footer-inner {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 20px 24px;
+  border-top: 1px solid rgba(159, 93, 129, 0.2);
+  color: var(--muted);
+}
+
+.site-footer-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.site-footer-brand {
+  color: var(--text);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+.site-footer-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.site-footer-credit {
+  margin: 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+  opacity: 0.9;
+}
+
 @media (max-width: 900px) {
   .layout-grid {
     grid-template-columns: 1fr;
@@ -499,5 +542,13 @@ input {
   .share-code-badge {
     width: 100%;
     letter-spacing: 0.14em;
+  }
+
+  .site-footer {
+    padding-bottom: 20px;
+  }
+
+  .site-footer-inner {
+    padding: 16px 4px 0;
   }
 }
